@@ -1,0 +1,90 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: sls-az-func-rest-api
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: azure
+  region: West US 2
+  runtime: nodejs10.x
+  # prefix: "sample"  # prefix of generated resource name
+  # subscriptionId: A356AC8C-E310-44F4-BF85-C7F29044AF99
+  # stage: dev
+  # type: premium  # premium azure functions
+
+  environment: # these will be created as application settings
+    NODE_ENV: 'uat'
+
+  # you can define apim configuration here
+  # apim:
+  #   apis:
+  #     - name: v1
+  #       subscriptionRequired: false # if true must provide an api key
+  #       displayName: v1
+  #       description: V1 sample app APIs
+  #       protocols:
+  #         - https
+  #       path: v1
+  #       tags:
+  #         - tag1
+  #         - tag2
+  #       authorization: none
+  #   cors:
+  #     allowCredentials: false
+  #     allowedOrigins:
+  #       - "*"
+  #     allowedMethods:
+  #       - GET
+  #       - POST
+  #       - PUT
+  #       - DELETE
+  #       - PATCH
+  #     allowedHeaders:
+  #       - "*"
+  #     exposeHeaders:
+  #       - "*"
+
+plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
+  - serverless-azure-functions
+
+# you can add packaging information here
+package:
+  # include:
+  #   - include-me.js
+  #   - include-me-dir/**
+  exclude:
+    - local.settings.json
+    - .vscode/**
+
+functions:
+  issues:
+    handler: src/handlers/issues.handler
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          authLevel: anonymous
+
+  pulls:
+    handler: src/handlers/pulls.handler
+    events:
+      - http: true
+        x-azure-settings:
+          methods:
+            - GET
+          authLevel: anonymous
