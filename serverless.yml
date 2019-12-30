@@ -19,47 +19,57 @@ service: sls-az-func-rest-api
 
 provider:
   name: azure
-  region: West US 2
+  region: ${opt:region, 'West US'}
+  stage: ${opt:stage, 'dev'}
+  prefix: ${opt:prefix, 'demo'}
   runtime: nodejs10.x
-  # prefix: "sample"  # prefix of generated resource name
   # subscriptionId: A356AC8C-E310-44F4-BF85-C7F29044AF99
-  # stage: dev
   # type: premium  # premium azure functions
 
   environment: # these will be created as application settings
     NODE_ENV: 'uat'
 
   # you can define apim configuration here
-  # apim:
-  #   apis:
-  #     - name: v1
-  #       subscriptionRequired: false # if true must provide an api key
-  #       displayName: v1
-  #       description: V1 sample app APIs
-  #       protocols:
-  #         - https
-  #       path: v1
-  #       tags:
-  #         - tag1
-  #         - tag2
-  #       authorization: none
-  #   cors:
-  #     allowCredentials: false
-  #     allowedOrigins:
-  #       - "*"
-  #     allowedMethods:
-  #       - GET
-  #       - POST
-  #       - PUT
-  #       - DELETE
-  #       - PATCH
-  #     allowedHeaders:
-  #       - "*"
-  #     exposeHeaders:
-  #       - "*"
+  # apim: true
+  apim:
+    apis:
+      - name: github-api
+        # Require an API Key if true
+        subscriptionRequired: false
+        displayName: Github API
+        description: The GitHub API
+        protocols:
+          - https
+        # Defaults to /api
+        path: github
+        # Azure resource tags
+        tags:
+          - apimTag1
+          - apimTag2
+        authorization: none
+    backends:
+      - name: github-backend
+        url: api/github
+    cors:
+      allowCredentials: false
+      allowedOrigins:
+        - "*"
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - PATCH
+      allowedHeaders:
+        - "*"
+      exposeHeaders:
+        - "*"
+    sku:
+      name: {Consumption|Developer|Basic|Standard|Premium}
 
 plugins: # look for additional plugins in the community plugins repo: https://github.com/serverless/plugins
   - serverless-azure-functions
+  - serverless-webpack
 
 # you can add packaging information here
 package:
@@ -79,6 +89,13 @@ functions:
           methods:
             - GET
           authLevel: anonymous
+    apim:
+      api: github-api
+      backend: github-backend
+      operations:
+        - method: get
+          urlTemplate: /issues
+          displayName: GetIssues
 
   pulls:
     handler: src/handlers/pulls.handler
@@ -88,3 +105,10 @@ functions:
           methods:
             - GET
           authLevel: anonymous
+    apim:
+      api: github-api
+      backend: github-backend
+      operations:
+        - method: get
+          urlTemplate: /pulls
+          displayName: GetPullRequests
